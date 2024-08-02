@@ -12,11 +12,10 @@ import matplotlib.pyplot as plt
 import mlflow
 import dagshub
 
-dagshub.init(repo_owner= "Ubaidmalik9567", repo_name="mlpipeline_exp_tracking_dags", mlflow= True)
-mlflow.set_tracking_uri("https://github.com/Ubaidmalik9567/mlpipeline_exp_tracking_dags.git")
-mlflow.set_experiment(experiment_name="dagsdash hub Demo")
+dagshub.init(repo_owner='Ubaidmalik9567', repo_name='mlpipeline_exp_tracking_dags', mlflow=True)
+mlflow.set_tracking_uri("https://dagshub.com/Ubaidmalik9567/mlpipeline_exp_tracking_dags.mlflow")
 
-# Set up logging
+# Set up logging 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def load_and_split_data(dataset_path: str) -> tuple:
@@ -42,7 +41,7 @@ def load_save_model(file_path: str):
         logging.error(f"Error loading model: {e}")
         raise
 
-def evaluate_model(clf, X_test: np.ndarray, y_test: np.ndarray) -> dict:
+def evaluate_model(clf, X_test: np.ndarray, y_test: np.ndarray) -> tuple:
     try:
         logging.info("Evaluating model performance.")
         y_pred = clf.predict(X_test)
@@ -60,7 +59,8 @@ def evaluate_model(clf, X_test: np.ndarray, y_test: np.ndarray) -> dict:
             'auc': auc
         }
         logging.info("Model evaluation completed successfully.")
-        return metrics_dict
+        return metrics_dict ,y_pred
+    
     except Exception as e:
         logging.error(f"Error evaluating model: {e}")
         raise
@@ -89,13 +89,14 @@ def main():
         x, y = load_and_split_data(processed_datasets_path)
         model = load_save_model(trained_model_path)
 
-        metrics_dict = evaluate_model(model, x, y)
+        metrics_dict, ypred = evaluate_model(model, x, y)
         save_metrics(metrics_dict, save_metrics_location)
 
         with open("params.yaml","r") as file:
             params = yaml.safe_load((file))
 
         with mlflow.start_run() as run:
+            mlflow.set_experiment("dagsdash hub Demo")
             mlflow.log_metric('accuracy', metrics_dict['accuracy'])
             mlflow.log_metric('precision', metrics_dict['precision'])
             mlflow.log_metric('recall', metrics_dict['recall'])
@@ -108,7 +109,7 @@ def main():
                 
         # Create a confusion matrix plot
         plt.figure(figsize=(6, 6))
-        cf_matrix = confusion_matrix(x, y)
+        cf_matrix = confusion_matrix(y, ypred)
         sns.heatmap(cf_matrix, annot=True, fmt='d', cmap='Blues')
         plt.xlabel('Predicted')
         plt.ylabel('Actual')

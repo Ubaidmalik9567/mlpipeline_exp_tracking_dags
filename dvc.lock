@@ -82,3 +82,19 @@ stages:
       hash: md5
       md5: 46578eced84ecce047dc622a8a4cc241
       size: 236894
+  predict_model:
+    cmd: python ./src/models/predict_model.py /data/processed
+    deps:
+    - path: ./data/processed/processed_testdata.csv
+      hash: md5
+      md5: 4fb80a53c60785126dec4802cded3b44
+      size: 2914665
+    - path: ./src/models/predict_model.py
+      hash: md5
+      md5: 2b7493c22162ec52b906a3889aa8b129
+      size: 4779
+    outs:
+    - path: ./reports/metrics.json
+      hash: md5
+      md5: 68c548c77ffbf7983e7b3c0d3142f590
+      size: 145
