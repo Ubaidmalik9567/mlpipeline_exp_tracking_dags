@@ -1,0 +1,7 @@
+data_transformation:
+    split_dataset_size: 0.33
+    seed: 45
+build_features:
+    max_features: 150
+train_model:
+    no_estimators: 170
